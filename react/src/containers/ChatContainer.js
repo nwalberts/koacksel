@@ -22,14 +22,18 @@ class ChatContainer extends Component {
       received: function(data) {
         this.handleChatReceipt(data);
       },
+
+      speak: function(data) {
+        console.log(this)
+        this.perform('speak', data)
+      },
+
       handleChatReceipt: this.handleChatReceipt
     })
   }
 
   handleChatReceipt(chat) {
     this.setState({ chats: this.state.chats.concat(chat) })
-    // let chatWindow = document.getElementById('chatWindow');
-    // chatWindow.scrollTop = chatWindow.scrollHeight;
   }
 
   handleClearForm() {
@@ -41,6 +45,9 @@ class ChatContainer extends Component {
     let payload = JSON.stringify({
       message: this.state.message
     });
+
+    // instead of using a fetch request, I would want to call the App.room.speak method to send the payload back through Websockets
+
     fetch('/api/v1/messages.json', {
       credentials: 'same-origin',
       method: 'POST',
@@ -63,7 +70,6 @@ class ChatContainer extends Component {
   }
 
   render() {
-
     let chats = this.state.chats.map(chat => {
       return(
         <ChatMessage
