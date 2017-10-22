@@ -7,6 +7,7 @@ class ChatContainer extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      user_handle: "",
       chats: [],
       message: ''
     }
@@ -18,15 +19,31 @@ class ChatContainer extends Component {
   }
 
   componentDidMount() {
-    App.room = App.cable.subscriptions.create("ChatChannel", {
-      received: function(data) {
-        this.handleChatReceipt(data);
+    // App.room = App.cable.subscriptions.create("ChatChannel", {
+    //   received: function(data) {
+    //     this.handleChatReceipt(data);
+    //   },
+    //   handleChatReceipt: this.handleChatReceipt
+    // })
+
+    App.gameChannel = App.cable.subscriptions.create(
+      {
+        channel: "GameChannel",
+        game_id: 1
       },
-      handleChatReceipt: this.handleChatReceipt
-    })
+      {
+        connected: () => console.log("GameChannel connected"),
+        disconnected: () => console.log("GameChannel disconnected"),
+        received: data => {
+          console.log(data)
+          this.handleChatReceipt(data)
+        }
+      }
+    );
   }
 
   handleChatReceipt(chat) {
+    debugger;
     this.setState({ chats: this.state.chats.concat(chat) })
     // let chatWindow = document.getElementById('chatWindow');
     // chatWindow.scrollTop = chatWindow.scrollHeight;
@@ -38,24 +55,29 @@ class ChatContainer extends Component {
 
   handleFormSubmit(event) {
     event.preventDefault();
-    let payload = JSON.stringify({
-      message: this.state.message
-    });
-    fetch('/api/v1/messages.json', {
-      credentials: 'same-origin',
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: payload
+    // let payload = JSON.stringify({
+    //   message: this.state.message
+    // });
+    // fetch('/api/v1/messages.json', {
+    //   credentials: 'same-origin',
+    //   method: 'POST',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   body: payload
+    // })
+    // .then((response) => {
+    //   let { ok } = response;
+    //   if (ok) {
+    //     return response.json();
+    //   }
+    // })
+    // .then((data) => {
+    // })
+    let prepMessage = this.state.message
+    App.gameChannel.send({
+     message: prepMessage,
+     nicks_message: "booyaga"
     })
-    .then((response) => {
-      let { ok } = response;
-      if (ok) {
-        return response.json();
-      }
-    })
-    .then((data) => {
-      this.handleClearForm();
-    })
+    this.handleClearForm();
   }
 
   handleMessageChange(event) {
@@ -63,14 +85,13 @@ class ChatContainer extends Component {
   }
 
   render() {
-
     let chats = this.state.chats.map(chat => {
       return(
         <ChatMessage
           key={chat.key}
           handle={chat.handle}
           message={chat.message}
-          icon={chat.icon_num}
+          icon="1"
         />
       )
     });
