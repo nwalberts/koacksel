@@ -10,7 +10,6 @@ class GameChannel < ApplicationCable::Channel
 
   def receive(data)
     # ActionCable.server.broadcast "chat_channel", message: data[:message], handle: "Mr. Random", icon_num: 1, key: "#{Time.now.to_datetime.strftime('%Q')}-#{current_user.id}"
-    binding.pry
 
     data["chat_key"] = "#{Time.now.to_datetime.strftime('%Q')}-#{current_user.id}"
 
