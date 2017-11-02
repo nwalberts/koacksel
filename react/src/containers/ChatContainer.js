@@ -7,6 +7,7 @@ class ChatContainer extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      user: {},
       chats: [],
       message: ''
     }
@@ -18,18 +19,38 @@ class ChatContainer extends Component {
   }
 
   componentDidMount() {
-    App.room = App.cable.subscriptions.create("ChatChannel", {
-      received: function(data) {
-        this.handleChatReceipt(data);
-      },
-
-      speak: function(data) {
-        console.log(this)
-        this.perform('speak', data)
-      },
-
-      handleChatReceipt: this.handleChatReceipt
+    // App.room = App.cable.subscriptions.create("ChatChannel", {
+    // })
+    fetch('/api/v1/users', {
+      credentials: 'same-origin',
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' }
     })
+    .then((response) => {
+      let { ok } = response;
+      if (ok) {
+        return response.json();
+      }
+    })
+    .then((data) => {
+      console.log(data)
+      this.setState({user: data})
+    })
+
+    App.gameChannel = App.cable.subscriptions.create(
+      {
+        channel: "GameChannel",
+        game_id: 1
+      },
+      {
+        connected: () => console.log("GameChannel connected"),
+        disconnected: () => console.log("GameChannel disconnected"),
+        received: data => {
+          console.log(data)
+          this.handleChatReceipt(data)
+        }
+      }
+    );
   }
 
   handleChatReceipt(chat) {
@@ -42,27 +63,15 @@ class ChatContainer extends Component {
 
   handleFormSubmit(event) {
     event.preventDefault();
-    let payload = JSON.stringify({
-      message: this.state.message
-    });
+    let prepMessage = this.state.message
+    let user_info = this.state.user
 
-    // instead of using a fetch request, I would want to call the App.room.speak method to send the payload back through Websockets
+    App.gameChannel.send({
+     message: prepMessage,
+     user: user_info
+    })
 
-    fetch('/api/v1/messages.json', {
-      credentials: 'same-origin',
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: payload
-    })
-    .then((response) => {
-      let { ok } = response;
-      if (ok) {
-        return response.json();
-      }
-    })
-    .then((data) => {
-      this.handleClearForm();
-    })
+    this.handleClearForm();
   }
 
   handleMessageChange(event) {
@@ -70,16 +79,17 @@ class ChatContainer extends Component {
   }
 
   render() {
+    console.log(this.state)
     let chats = this.state.chats.map(chat => {
       return(
         <ChatMessage
           key={chat.key}
-          handle={chat.handle}
           message={chat.message}
-          icon={chat.icon_num}
+          handle={chat.user.handle}
+          icon={chat.user.icon_num}
         />
       )
-    });
+    }, this);
 
     return(
       <div>
