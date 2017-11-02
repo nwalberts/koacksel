@@ -1,7 +1,6 @@
 class Api::V1::MessagesController < Api::ApiController
   def create
     if params[:message].present?
-      # binding.pry
       ActionCable.server.broadcast "chat_channel", message: params[:message], handle: current_user.handle, icon_num: assign_icon_num, key: "#{Time.now.to_datetime.strftime('%Q')}-#{current_user.id}"
       render json: { message: params[:message], handle: current_user.handle }, status: :accepted
     else
