@@ -1,9 +1,9 @@
-class UsersController < ApplicationController
+class Api::V1::UsersController < ApplicationController
   def index
-    @users = User.all
+    render json: { user_id: current_user.id, handle: current_user.handle, icon_num: current_user.icon_num }
   end
+  # render json: { user_id: current_user.id, handle: current_user.handle, icon_num: current_user.icon_num }
 
-  def
 
   # def destroy
   #   @user = User.find(params[:id])

@@ -7,7 +7,7 @@ class ChatContainer extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      user_handle: "",
+      user: {},
       chats: [],
       message: ''
     }
@@ -20,11 +20,22 @@ class ChatContainer extends Component {
 
   componentDidMount() {
     // App.room = App.cable.subscriptions.create("ChatChannel", {
-    //   received: function(data) {
-    //     this.handleChatReceipt(data);
-    //   },
-    //   handleChatReceipt: this.handleChatReceipt
     // })
+    fetch('/api/v1/users', {
+      credentials: 'same-origin',
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' }
+    })
+    .then((response) => {
+      let { ok } = response;
+      if (ok) {
+        return response.json();
+      }
+    })
+    .then((data) => {
+      console.log(data)
+      this.setState({user: data})
+    })
 
     App.gameChannel = App.cable.subscriptions.create(
       {
@@ -43,10 +54,7 @@ class ChatContainer extends Component {
   }
 
   handleChatReceipt(chat) {
-    debugger;
     this.setState({ chats: this.state.chats.concat(chat) })
-    // let chatWindow = document.getElementById('chatWindow');
-    // chatWindow.scrollTop = chatWindow.scrollHeight;
   }
 
   handleClearForm() {
@@ -55,28 +63,14 @@ class ChatContainer extends Component {
 
   handleFormSubmit(event) {
     event.preventDefault();
-    // let payload = JSON.stringify({
-    //   message: this.state.message
-    // });
-    // fetch('/api/v1/messages.json', {
-    //   credentials: 'same-origin',
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: payload
-    // })
-    // .then((response) => {
-    //   let { ok } = response;
-    //   if (ok) {
-    //     return response.json();
-    //   }
-    // })
-    // .then((data) => {
-    // })
     let prepMessage = this.state.message
+    let user_info = this.state.user
+
     App.gameChannel.send({
      message: prepMessage,
-     nicks_message: "booyaga"
+     user: user_info
     })
+
     this.handleClearForm();
   }
 
@@ -85,16 +79,17 @@ class ChatContainer extends Component {
   }
 
   render() {
+    console.log(this.state)
     let chats = this.state.chats.map(chat => {
       return(
         <ChatMessage
           key={chat.key}
-          handle={chat.handle}
           message={chat.message}
-          icon="1"
+          handle={chat.user.handle}
+          icon={chat.user.icon_num}
         />
       )
-    });
+    }, this);
 
     return(
       <div>
