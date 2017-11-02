@@ -1,5 +1,6 @@
 class Api::V1::MessagesController < Api::ApiController
   def create
+    # defunct
     if params[:message].present?
       # binding.pry
       ActionCable.server.broadcast "chat_channel", message: params[:message], handle: current_user.handle, icon_num: assign_icon_num, key: "#{Time.now.to_datetime.strftime('%Q')}-#{current_user.id}"
@@ -8,6 +9,9 @@ class Api::V1::MessagesController < Api::ApiController
       render json: { errors: "bad request" }, status: :bad_request
     end
   end
+
+
+
   private
 
   def assign_icon_num

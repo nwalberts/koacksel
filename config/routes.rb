@@ -10,10 +10,11 @@ Rails.application.routes.draw do
   namespace :api do
     namespace :v1 do
       resources :messages, only: [:create]
+      resources :users, only: [:index]
     end
   end
 
-  resources :users, only: [:index, :destroy]
+  # resources :users, only: [:index, :destroy]
 
   devise_for :users
 
