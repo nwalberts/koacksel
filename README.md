@@ -84,7 +84,7 @@ module ApplicationCable
 end
 ```
 
-*Note*: I dont have the above code working one hundred percent, so you my code might not give you access to the current_user, but the user_id should be transmitting every time and authentication is in place using `warden_hooks`.
+In this case, we use cookies via warden_hooks to set up a `current_user` method that will be accessible across all of our channels.
 
 Channels
 * Channels are like our ActionCable controllers. A consumer (the client) can be subscribed to these channels.
@@ -112,11 +112,29 @@ Client-Side JS
 
 ---
 
-The below setup has been provided by stenagli, who graciously allowed me to use his tutorial in this example app for the purposes of learning! All of it is from his gist, which you can find here, but I thought would be valuable to include directly and make minor edits for clarification.
+The below setup has been provided by stenagli, who graciously allowed me to use his tutorial in this example app for the purposes of learning! All of it is from his gist, which you can find here, but I thought would be valuable to include directly and make minor edits for clarification (I've also added a few things here or there, but he was the one that broke ground!)
 
 ## Signed Cookie
 
-Section 3.1.1 discusses a signed cookie to authorize the connection. This can be accomplished by using a Warden initialization hook. Keep in mind that the initializer in the article should be placed in config/initializers/warden_hooks.rb instead of app/config/initializers/warden_hooks.rb. If your Rails server is currently running, you'll need to restart it for the hook to take effect.
+Section 3.1.1 discusses a signed cookie to authorize the connection. This can be accomplished by using a Warden initialization hook.
+
+Without going into detail, this will help us set a user's id in cookies upon logging in, remove that cookie if they have been inactive, and also remove it if they log out.
+
+Copy the code below and paste it into `config/initializers/warden_hooks.rb` (which you may need to create). If you start getting odd errors, you may need to install the `warden` gem as well.
+
+```ruby
+Warden::Manager.after_set_user do |user,auth,opts|
+  scope = opts[:scope]
+  auth.cookies.signed["#{scope}.id"] = user.id
+  auth.cookies.signed["#{scope}.expires_at"] = 30.minutes.from_now
+end
+
+Warden::Manager.before_logout do |user, auth, opts|
+  scope = opts[:scope]
+  auth.cookies.signed["#{scope}.id"] = nil
+  auth.cookies.signed["#{scope}.expires_at"] = nil
+end
+```
 
 ## Server-side Channel Configuration
 
