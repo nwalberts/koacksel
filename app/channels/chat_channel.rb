@@ -1,7 +1,5 @@
 class ChatChannel < ApplicationCable::Channel
   def subscribed
-    # stream_from "some_channel"
-    # binding.pry
     stream_from "chat_#{params[:chat_id]}"
     # stream_from "chat_channel"
   end
@@ -13,9 +11,11 @@ class ChatChannel < ApplicationCable::Channel
   def receive(data)
     puts data
 
-    # I could take the new message and persist it as well, in order to retain chat state
+    chat = Chat.find_or_create_by(id: params[:chat_id])
+    chat.messages << Message.create(body: data["message"], user: User.find(data["user"]["user_id"]))
 
-    chat_key = "#{Time.now.to_datetime.strftime('%Q')}-#{current_user.id}"
+    # chat_key = "#{Time.now.to_datetime.strftime('%Q')}-#{current_user.id}"
+    chat_key = chat.id
 
     chat_json = {
       "chat_key": chat_key,

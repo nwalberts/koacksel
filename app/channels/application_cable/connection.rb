@@ -6,6 +6,8 @@ module ApplicationCable
       self.current_user = find_verified_user
     end
 
+    # Allow for current user via cookies
+
     protected
       def find_verified_user
         verified_user = User.find_by(id: cookies.signed['user.id'])
