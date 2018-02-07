@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import ChatMessage from '../components/ChatMessage';
 import TextFieldWithSubmit from '../components/TextFieldWithSubmit';
 
-
 class ChatContainer extends Component {
   constructor(props) {
     super(props);
