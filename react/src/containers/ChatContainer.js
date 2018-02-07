@@ -19,8 +19,6 @@ class ChatContainer extends Component {
   }
 
   componentDidMount() {
-    // App.room = App.cable.subscriptions.create("ChatChannel", {
-    // })
     fetch('/api/v1/users', {
       credentials: 'same-origin',
       method: 'GET',
@@ -33,19 +31,22 @@ class ChatContainer extends Component {
       }
     })
     .then((data) => {
-      console.log(data)
       this.setState({user: data})
     })
 
     App.gameChannel = App.cable.subscriptions.create(
+      // Info that is sent to the subscribed method
       {
-        channel: "GameChannel",
-        game_id: 1
+        channel: "ChatChannel",
+        chat_id: 1
+        // If you had router, you could do:
+        // game_id: this.props.params["id"]
       },
       {
-        connected: () => console.log("GameChannel connected"),
-        disconnected: () => console.log("GameChannel disconnected"),
+        connected: () => console.log("ChatChannel connected"),
+        disconnected: () => console.log("ChatChannel disconnected"),
         received: data => {
+          // Data broadcasted from the chat channel
           console.log(data)
           this.handleChatReceipt(data)
         }
@@ -66,6 +67,7 @@ class ChatContainer extends Component {
     let prepMessage = this.state.message
     let user_info = this.state.user
 
+    // Send info to the receive method on the back end
     App.gameChannel.send({
      message: prepMessage,
      user: user_info
@@ -79,14 +81,13 @@ class ChatContainer extends Component {
   }
 
   render() {
-    console.log(this.state)
     let chats = this.state.chats.map(chat => {
       return(
         <ChatMessage
           key={chat.key}
-          message={chat.message}
           handle={chat.user.handle}
           icon={chat.user.icon_num}
+          message={chat.message}
         />
       )
     }, this);
