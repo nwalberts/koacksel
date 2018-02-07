@@ -1,19 +1,33 @@
 class ChatChannel < ApplicationCable::Channel
   def subscribed
-    stream_from "chat_channel"
+    # stream_from "some_channel"
+    # binding.pry
+    stream_from "chat_#{params[:chat_id]}"
+    # stream_from "chat_channel"
   end
 
   def unsubscribed
-    stop_all_streams
+    # Any cleanup needed when channel is unsubscribed
   end
 
-  # OG channel, which I will soon move my code into ;)
-  def speak(data)
-    # binding.pry
-    # here, instead of broadcasting a message, I could save a Message object into my database. The message would belong to a Chatroom object. Then, in the subscribed metod, I could stream any changes from that Chatoom
+  def receive(data)
+    puts data
 
-    #  Note, I wont have access to current user here. Only the data that was passed. ActionCable annoyingly can only be configured with cookies, and I havent gotten that up and running yet. You can either pass up the data from your messagescontroller and through, or configure cookies.
+    # I could take the new message and persist it as well, in order to retain chat state
 
-    # ActionCable.server.broadcast "chat_channel", message: data[:message], handle: current_user.handle, icon_num: 1, key: "#{Time.now.to_datetime.strftime('%Q')}-#{current_user.id}"
+    chat_key = "#{Time.now.to_datetime.strftime('%Q')}-#{current_user.id}"
+
+    chat_json = {
+      "chat_key": chat_key,
+      "message": data["message"],
+      "user": data["user"]
+    }
+
+    ActionCable.server.broadcast("chat_#{params[:chat_id]}", chat_json)
   end
+
 end
+
+# For these chats, I would have to make a "Discussion" or "Chat" object, that has many "Messages"
+# I would then take the Discussion id, get the discussion, and add an associated messaged
+# On componentDidMount, I could then grab all of the messages for this Discussion so that no one misses out
