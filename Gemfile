@@ -17,6 +17,7 @@ gem "coffee-rails", "~> 4.2"
 gem "jbuilder", "~> 2.5"
 gem "redis", "~> 3.0"
 gem 'foundation-rails'
+gem 'warden'
 
 group :development, :test do
   gem 'capybara'

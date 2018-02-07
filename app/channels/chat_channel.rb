@@ -13,6 +13,8 @@ class ChatChannel < ApplicationCable::Channel
   def receive(data)
     puts data
 
+    # I could take the new message and persist it as well, in order to retain chat state
+
     chat_key = "#{Time.now.to_datetime.strftime('%Q')}-#{current_user.id}"
 
     chat_json = {
