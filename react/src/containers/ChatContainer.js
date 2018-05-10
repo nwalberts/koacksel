@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import ChatMessage from '../components/ChatMessage';
+import Message from '../components/Message';
 import TextFieldWithSubmit from '../components/TextFieldWithSubmit';
 
 class ChatContainer extends Component {
@@ -7,11 +7,11 @@ class ChatContainer extends Component {
     super(props);
     this.state = {
       user: {},
-      chats: [],
+      messages: [],
       message: ''
     }
 
-    this.handleChatReceipt = this.handleChatReceipt.bind(this);
+    this.handleMessageReceipt = this.handleMessageReceipt.bind(this);
     this.handleClearForm = this.handleClearForm.bind(this);
     this.handleFormSubmit = this.handleFormSubmit.bind(this);
     this.handleMessageChange = this.handleMessageChange.bind(this);
@@ -33,13 +33,13 @@ class ChatContainer extends Component {
       this.setState({user: data})
     })
 
-    App.gameChannel = App.cable.subscriptions.create(
+    App.chatChannel = App.cable.subscriptions.create(
       // Info that is sent to the subscribed method
       {
         channel: "ChatChannel",
         chat_id: 1
         // If you had router, you could do:
-        // game_id: this.props.params["id"]
+        // chat_id: this.props.params["id"]
       },
       {
         connected: () => console.log("ChatChannel connected"),
@@ -47,14 +47,14 @@ class ChatContainer extends Component {
         received: data => {
           // Data broadcasted from the chat channel
           console.log(data)
-          this.handleChatReceipt(data)
+          this.handleMessageReceipt(data)
         }
       }
     );
   }
 
-  handleChatReceipt(chat) {
-    this.setState({ chats: this.state.chats.concat(chat) })
+  handleMessageReceipt(message) {
+    this.setState({ messages: this.state.messages.concat(message) })
   }
 
   handleClearForm() {
@@ -67,7 +67,7 @@ class ChatContainer extends Component {
     let user_info = this.state.user
 
     // Send info to the receive method on the back end
-    App.gameChannel.send({
+    App.chatChannel.send({
      message: prepMessage,
      user: user_info
     })
@@ -80,13 +80,13 @@ class ChatContainer extends Component {
   }
 
   render() {
-    let chats = this.state.chats.map(chat => {
+    let messages = this.state.messages.map(message => {
       return(
-        <ChatMessage
-          key={chat.key}
-          handle={chat.user.handle}
-          icon={chat.user.icon_num}
-          message={chat.message}
+        <Message
+          key={message.messageId}
+          handle={message.user.handle}
+          icon={message.user.icon_num}
+          message={message.message}
         />
       )
     }, this);
@@ -94,7 +94,7 @@ class ChatContainer extends Component {
     return(
       <div>
         <div className='callout chat' id='chatWindow'>
-          {chats}
+          {messages}
         </div>
         <form onSubmit={this.handleFormSubmit}>
           <TextFieldWithSubmit
