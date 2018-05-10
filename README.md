@@ -48,7 +48,7 @@ We’ll need
 * puma
 
 Rails ActionCable Config
-* A channels folder should already be present in our Rails 5 app!
+* To start this tutorial, make sure to run `rails g channel Chat`, or `rails g challen <YOUR_CHANNEL_NAME>` so that you have the necessary action cable folders. 
 
 React
 - componentDidMount has the actionCable code, as well as code that is used to set the user's info in local React state
