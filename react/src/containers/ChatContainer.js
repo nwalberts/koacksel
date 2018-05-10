@@ -33,7 +33,7 @@ class ChatContainer extends Component {
       this.setState({user: data})
     })
 
-    App.gameChannel = App.cable.subscriptions.create(
+    App.chatChannel = App.cable.subscriptions.create(
       // Info that is sent to the subscribed method
       {
         channel: "ChatChannel",
@@ -67,7 +67,7 @@ class ChatContainer extends Component {
     let user_info = this.state.user
 
     // Send info to the receive method on the back end
-    App.gameChannel.send({
+    App.chatChannel.send({
      message: prepMessage,
      user: user_info
     })
