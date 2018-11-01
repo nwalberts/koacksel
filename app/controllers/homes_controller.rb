@@ -1,6 +1,6 @@
 class HomesController < ApplicationController
   def index
-    @chats = Chat.all
+    # @chats = Chat.all
   end
 
   def show
