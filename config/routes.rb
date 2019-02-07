@@ -7,9 +7,11 @@ Rails.application.routes.draw do
   namespace :api do
     namespace :v1 do
       resources :messages, only: [:create]
-      resources :users, only: [:index]
+      resources :users, only: [:show]
+      get "users/current" => "users#current_user"
     end
   end
+
 
   resources :users, only: [:index, :destroy]
 
