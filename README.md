@@ -21,7 +21,7 @@ You will also probably need to have a running Redis on your system (e.g. brew in
 If you don't, tasks will likely be asynchronous, and this shouldn't cause too much issue in development, but I can't promise success in production
 
 When you deploy, you will need to configure with Redis on your Heroku Addons.
-This doc talks briefly about configuration needed:
+This doc talks briefly about configuration needed. Since we are using React and we already have our own rails code, you can largely ignore the code files excepting the cable.yml file. Take special note of any heroku or terminal commands that may be needed:
 Heroku Guide to Action Cable (non-ReactJS)
 https://blog.heroku.com/real_time_rails_implementing_websockets_in_rails_5_with_action_cable
 
@@ -150,23 +150,23 @@ class ChatChannel < ApplicationCable::Channel
   end
 
   def receive(data)
-    # Our receive method is the most used. Its essentially our endpoint for our Rails app. It can get complex fast though, so continuing to build out private methods that are used below will become important.
     puts data
-
+    # Currently, we dont actually use this code that much. But you would have to set up these models if you want to record the conversations in your chat.
     chat = Chat.find_or_create_by(id: params[:chat_id])
-    chat.messages << Message.create(body: data["message"], user: User.find(data["user"]["user_id"]))
+    new_message = Message.create(body: data["message"], user: User.find(data["user"]["user_id"]))
+    chat.messages << new_message
 
     chat_key = chat.id
 
     chat_json = {
       "chat_key": chat_key,
-      "message": data["message"],
+      "message": new_message.body,
+      "messageId": new_message.id,
       "user": data["user"]
     }
 
     ActionCable.server.broadcast("chat_#{params[:chat_id]}", chat_json)
   end
-
 end
 
 ```
@@ -200,7 +200,7 @@ If there can be multiple parameterized channel instances, you can pass an object
 
 The second parameter to create is an object whose values are functions. The function assigned to the key received will be run on data received from a backend call to ActionCable.server.broadcast, such as the one above.
 
-Sending a message from the client
+#### Sending a message from the client
 
 To send a message to ActionCable (e.g. to be broadcast to all connected clients), you can run the send() method on the variable you saved the new subscription to, e.g.
 
