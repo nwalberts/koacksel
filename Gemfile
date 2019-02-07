@@ -18,6 +18,7 @@ gem "jbuilder", "~> 2.5"
 gem "redis", "~> 3.0"
 gem 'foundation-rails'
 gem 'warden'
+gem 'rb-readline'
 
 group :development, :test do
   gem 'capybara'

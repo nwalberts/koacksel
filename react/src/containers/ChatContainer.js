@@ -18,7 +18,7 @@ class ChatContainer extends Component {
   }
 
   componentDidMount() {
-    fetch('/api/v1/users', {
+    fetch("/api/v1/users/current", {
       credentials: 'same-origin',
       method: 'GET',
       headers: { 'Content-Type': 'application/json' }
@@ -38,6 +38,7 @@ class ChatContainer extends Component {
       {
         channel: "ChatChannel",
         chat_id: 1
+        // currently this is hardcoded
         // If you had router, you could do:
         // chat_id: this.props.params["id"]
       },
